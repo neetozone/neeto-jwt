@@ -1,0 +1,16 @@
+{
+  "name": "neeto-jwt",
+  "version": "0.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "build": "parcel build src/index.ts"
+  },
+  "devDependencies": {
+    "parcel": "2.14.2",
+    "typescript": "5.7.2",
+    "vite": "6.2.0"
+  }
+}
