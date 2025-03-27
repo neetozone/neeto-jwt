@@ -1,16 +1,19 @@
 {
   "name": "neeto-jwt",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "engines": {
     "node": ">=22.13"
   },
   "scripts": {
-    "build": "parcel build src/index.ts"
+    "build": "tsc",
+    "dev": "NODE_NO_WARNINGS=1 node --loader ts-node/esm -i -e \"import NeetoJWT from './src/index.ts'; globalThis.NeetoJWT = NeetoJWT;\""
+  },
+  "dependencies": {
+    "jsonwebtoken": "9.0.2"
   },
   "devDependencies": {
-    "parcel": "2.14.2",
-    "typescript": "5.7.2",
-    "vite": "6.2.0"
+    "ts-node": "10.9.2",
+    "typescript": "5.7.2"
   }
 }

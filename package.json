@@ -13,7 +13,7 @@
     "typescript-eslint": "8.28.0"
   },
   "lint-staged": {
-    "./**/*.{js,ts,mjs,cjs,json}": [
+    "./**/*.{js,ts,mjs,cjs}": [
       "prettier --write",
       "eslint --fix"
     ]

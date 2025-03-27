@@ -1,15 +1,15 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "module": "ESNext",
-    "lib": ["ESNext"],
+    "module": "NodeNext",
+    "lib": ["ES2020"],
 
     /* Bundler mode */
     "moduleResolution": "NodeNext",
-    "allowImportingTsExtensions": true,
     "isolatedModules": true,
     "moduleDetection": "force",
-    "noEmit": true,
+    "declaration": true,
+    "outDir": "dist",
 
     /* Linting */
     "strict": true,
