@@ -5,6 +5,13 @@
   "engines": {
     "node": ">=22.13"
   },
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "import": "./dist/index.js",
+    "require": "./dist/index.cjs"
+  },
   "scripts": {
     "build": "tsc",
     "dev": "NODE_NO_WARNINGS=1 node --loader ts-node/esm -i -e \"import NeetoJWT from './src/index.ts'; globalThis.NeetoJWT = NeetoJWT;\""
