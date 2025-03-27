@@ -1,0 +1,26 @@
+{
+  "name": "neeto-jwt",
+  "version": "1.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "import": "./dist/index.js",
+    "require": "./dist/index.cjs"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "NODE_NO_WARNINGS=1 node --loader ts-node/esm -i -e \"import NeetoJWT from './src/index.ts'; globalThis.NeetoJWT = NeetoJWT;\""
+  },
+  "dependencies": {
+    "jsonwebtoken": "9.0.2"
+  },
+  "devDependencies": {
+    "ts-node": "10.9.2",
+    "typescript": "5.7.2"
+  }
+}
