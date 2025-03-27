@@ -1,0 +1,7 @@
+{
+  "recommendations": [
+    "kaiwood.endwise",
+    "Shopify.ruby-lsp",
+    "dbaeumer.vscode-eslint"
+  ]
+}
