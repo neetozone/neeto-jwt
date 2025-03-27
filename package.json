@@ -1,0 +1,10 @@
+{
+  "name": "neeto-jwt",
+  "description": "A client to generate JWT for JWT-based login in Neeto.",
+  "devDependencies": {
+    "husky": "9.1.7"
+  },
+  "scripts": {
+    "prepare": "husky"
+  }
+}
