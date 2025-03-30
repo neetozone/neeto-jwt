@@ -5,7 +5,6 @@
 **Checklist**
 
 - [ ] I have made corresponding changes to the documentation.
-- [ ] I have updated the types definition of modified exports.
 - [ ] I have added the necessary label (`js` or `js` with
       `patch`/`minor`/`major` - If publish is required).
 
