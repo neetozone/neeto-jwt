@@ -3,6 +3,7 @@
     "target": "ESNext",
     "module": "NodeNext",
     "lib": ["ES2020"],
+    "types": ["node"],
 
     /* Bundler mode */
     "moduleResolution": "NodeNext",
