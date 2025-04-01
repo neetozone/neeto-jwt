@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { getLoginUri, getRedirectUri, SearchParams } from "./utils.js";
+import { getLoginUri, SearchParams } from "./utils.js";
 
 interface Options {
   email: string;
@@ -43,13 +43,20 @@ class NeetoJWT {
     return token;
   };
 
-  generateLoginUrl = (product?: string) => {
+  generateLoginUrl = (redirectUri?: string) => {
     const searchParams: SearchParams = {
       jwt: this.generateJWT(),
+      state: btoa(
+        JSON.stringify({
+          subdomain: this.workspace,
+          signup: false,
+          origin: "https://localhost:3000",
+        })
+      ),
     };
 
-    if (product) {
-      searchParams.redirect_uri = getRedirectUri(this.workspace, product);
+    if (redirectUri) {
+      searchParams.redirect_uri = encodeURI(redirectUri);
     }
 
     return getLoginUri(this.workspace, searchParams);
