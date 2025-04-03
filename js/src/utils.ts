@@ -4,6 +4,7 @@ export type SearchParams = {
   jwt: string;
   redirect_uri?: string;
   state: string;
+  client_app_name?: string;
 };
 
 export const getLoginUri = (workspace: string, searchParams: SearchParams) => {

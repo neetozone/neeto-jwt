@@ -57,6 +57,7 @@ class NeetoJWT {
 
     if (redirectUri) {
       searchParams.redirect_uri = encodeURI(redirectUri);
+      searchParams.client_app_name = "Cal";
     }
 
     return getLoginUri(this.workspace, searchParams);
