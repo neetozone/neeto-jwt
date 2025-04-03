@@ -11,6 +11,9 @@
     "import": "./dist/index.js",
     "require": "./dist/index.js"
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc",
     "dev": "NODE_NO_WARNINGS=1 node --loader ts-node/esm -i -e \"import NeetoJWT from './src/index.ts'; globalThis.NeetoJWT = NeetoJWT;\"",
