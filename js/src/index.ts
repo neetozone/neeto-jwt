@@ -1,5 +1,10 @@
 import jwt from "jsonwebtoken";
-import { getClientAppName, getLoginUri, SearchParams } from "./utils.js";
+import {
+  getClientAppName,
+  getLoginUri,
+  getRedirectUri,
+  SearchParams,
+} from "./utils.js";
 
 interface Options {
   email: string;
@@ -48,7 +53,7 @@ class NeetoJWT {
 
     const searchParams: SearchParams = {
       jwt: this.generateJWT(),
-      redirect_uri: encodeURI(redirectUri),
+      redirect_uri: getRedirectUri(redirectUri),
       client_app_name: getClientAppName(redirectUri),
     };
 

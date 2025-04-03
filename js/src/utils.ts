@@ -1,4 +1,9 @@
-import { CLIENT_APPS, NEETO_URL_COMPONENT_REGEX, TLD } from "./constants.js";
+import {
+  CLIENT_APPS,
+  NEETO_URL_COMPONENT_REGEX,
+  NEETO_URL_PREFIX_REGEX,
+  TLD,
+} from "./constants.js";
 
 export type SearchParams = {
   jwt: string;
@@ -28,4 +33,14 @@ export const getClientAppName = (redirectUri: string) => {
   }
 
   return "Cal";
+};
+
+export const getRedirectUri = (redirectUri: string) => {
+  const match = redirectUri.match(NEETO_URL_PREFIX_REGEX);
+
+  if (match) {
+    return encodeURI(redirectUri.replace(NEETO_URL_PREFIX_REGEX, ""));
+  }
+
+  return encodeURI(getTopLevelDomain());
 };

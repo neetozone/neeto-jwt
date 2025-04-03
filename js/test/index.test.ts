@@ -53,7 +53,7 @@ describe("NeetoJWT", () => {
     expect(loginUrl).toContain("https://spinkart.neetoauth.com/users/auth/jwt");
     expect(loginUrl).toContain(`jwt=`);
     expect(loginUrl).toContain(
-      `redirect_uri=${encodeURIComponent(redirectUri)}`
+      `redirect_uri=${encodeURIComponent("neetocal.com/admin")}`
     );
     expect(loginUrl).toContain(`client_app_name=Cal`);
   });
