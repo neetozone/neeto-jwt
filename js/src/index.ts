@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { getLoginUri, SearchParams } from "./utils.js";
+import { getClientAppName, getLoginUri, SearchParams } from "./utils.js";
 
 interface Options {
   email: string;
@@ -43,21 +43,14 @@ class NeetoJWT {
     return token;
   };
 
-  generateLoginUrl = (redirectUri?: string) => {
+  generateLoginUrl = (redirectUri: string) => {
+    if (!redirectUri) throw new Error("Redirect URI is required");
+
     const searchParams: SearchParams = {
       jwt: this.generateJWT(),
-      state: btoa(
-        JSON.stringify({
-          subdomain: this.workspace,
-          signup: false,
-          origin: "https://localhost:3000",
-        })
-      ),
+      redirect_uri: encodeURI(redirectUri),
+      client_app_name: getClientAppName(redirectUri),
     };
-
-    if (redirectUri) {
-      searchParams.redirect_uri = encodeURI(redirectUri);
-    }
 
     return getLoginUri(this.workspace, searchParams);
   };
