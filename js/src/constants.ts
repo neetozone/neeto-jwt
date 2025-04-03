@@ -5,6 +5,7 @@ export const TLD: Record<string, string> = {
 };
 
 export const NEETO_URL_COMPONENT_REGEX = /neeto(\w+)/;
+export const NEETO_URL_PREFIX_REGEX = /^(https?:\/\/)?(www\.)?[\w-]+\./;
 
 export const CLIENT_APPS = {
   cal: "Cal",
