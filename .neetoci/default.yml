@@ -13,7 +13,7 @@ global_job_config:
   jobs:
     - name: CiChecks
       commands:
-        - yarn test --detectOpenHandles
+        - yarn test
 
 triggers:
   - event: branch
