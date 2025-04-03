@@ -1,7 +1,7 @@
 export const TLD: Record<string, string> = {
-  staging: "neetoauth.net",
+  staging: ".neetoauth.net",
   development: ".lvh.me:9000",
-  production: "neetoauth.com",
+  production: ".neetoauth.com",
 };
 
 export const NEETO_URL_COMPONENT_REGEX = /neeto(\w+)/;

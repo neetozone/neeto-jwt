@@ -13,7 +13,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "dev": "NODE_NO_WARNINGS=1 node --loader ts-node/esm -i -e \"import NeetoJWT from './src/index.ts'; globalThis.NeetoJWT = NeetoJWT;\""
+    "dev": "NODE_NO_WARNINGS=1 node --loader ts-node/esm -i -e \"import NeetoJWT from './src/index.ts'; globalThis.NeetoJWT = NeetoJWT;\"",
+    "test": "vitest run"
   },
   "dependencies": {
     "jsonwebtoken": "9.0.2"
@@ -21,6 +22,7 @@
   "devDependencies": {
     "@types/node": "22.13.14",
     "ts-node": "10.9.2",
-    "typescript": "5.7.2"
+    "typescript": "5.7.2",
+    "vitest": "3.1.1"
   }
 }
