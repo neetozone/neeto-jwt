@@ -1,6 +1,6 @@
 {
   "name": "neeto-jwt",
-  "version": "0.0.9",
+  "version": "1.0.0",
   "type": "module",
   "engines": {
     "node": ">=22.13"
