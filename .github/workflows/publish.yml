@@ -73,8 +73,6 @@ jobs:
           branch: main
 
       - name: Publish the package on NPM
-        uses: JS-DevTools/npm-publish@v3
-        with:
-          access: "public"
-          token: ${{ secrets.NPM_TOKEN }}
-          package: "./js/package.json"
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
+          npm publish
