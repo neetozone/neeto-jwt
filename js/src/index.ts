@@ -44,8 +44,16 @@ class NeetoJWT {
       exp,
     };
 
-    const token = jwt.sign(payload, this.privateKey, { algorithm: "ES256" });
-    return token;
+    try {
+      const token = jwt.sign(payload, this.privateKey, { algorithm: "ES256" });
+      return token;
+    } catch (error) {
+      throw new Error(
+        `Your key is invalid. We use asymmetric encryption for SSO login.\nPlease fill out https://neeto-jwt.neetodesk.com/forms/jwt-login-in-neeto.\nWe will generate a public-private key pair and share the private key with you. This key will assist you with SSO login.`
+      );
+    }
+
+    return null;
   };
 
   generateLoginUrl = (redirectUri: string) => {
