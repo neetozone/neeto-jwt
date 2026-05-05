@@ -79,4 +79,48 @@ describe("NeetoJWT", () => {
     });
     expect(decoded.workspace).toBe(process.env.NEETO_JWT_WORKSPACE);
   });
+
+  it("should default to user scope and produce a /users/auth/jwt URL", () => {
+    const neetoJWT = new NeetoJWT({ email, workspace, privateKey });
+    const loginUrl = neetoJWT.generateLoginUrl(redirectUri);
+    expect(loginUrl).toContain("/users/auth/jwt");
+    expect(loginUrl).not.toContain("/consumers/auth/jwt");
+  });
+
+  it("should produce a /consumers/auth/jwt URL when scope is 'consumer'", () => {
+    const neetoJWT = new NeetoJWT({
+      email,
+      workspace: "app",
+      privateKey,
+      scope: "consumer",
+    });
+    const loginUrl = neetoJWT.generateLoginUrl(redirectUri);
+    expect(loginUrl).toContain("/consumers/auth/jwt");
+    expect(loginUrl).not.toContain("/users/auth/jwt");
+    expect(loginUrl).toContain("https://app.neetoauth.com/consumers/auth/jwt");
+  });
+
+  it("should explicitly accept 'user' scope and produce the user URL", () => {
+    const neetoJWT = new NeetoJWT({
+      email,
+      workspace,
+      privateKey,
+      scope: "user",
+    });
+    const loginUrl = neetoJWT.generateLoginUrl(redirectUri);
+    expect(loginUrl).toContain("/users/auth/jwt");
+  });
+
+  it("should throw if scope is anything other than 'user' or 'consumer'", () => {
+    expect(
+      () =>
+        new NeetoJWT({
+          email,
+          workspace,
+          privateKey,
+          // @ts-expect-error: invalid scope passed deliberately to assert runtime guard.
+          scope: "admin",
+        })
+    ).toThrow("Scope must be either 'user' or 'consumer'.");
+  });
 });

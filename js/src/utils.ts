@@ -1,9 +1,12 @@
 import {
   CLIENT_APPS,
+  CONSUMER_LOGIN_PATH,
   NEETO_URL_COMPONENT_REGEX,
   NEETO_URL_PREFIX_REGEX,
   TLD,
+  USER_LOGIN_PATH,
 } from "./constants.js";
+import { Scope } from "./types.js";
 
 export type SearchParams = {
   jwt: string;
@@ -11,12 +14,17 @@ export type SearchParams = {
   client_app_name: string;
 };
 
-export const getLoginUri = (workspace: string, searchParams: SearchParams) => {
+export const getLoginUri = (
+  workspace: string,
+  searchParams: SearchParams,
+  scope: Scope = "user"
+) => {
   const protocol =
     process.env.NEETO_JWT_ENV === "development" ? "http" : "https";
   const params = new URLSearchParams(searchParams).toString();
+  const path = scope === "consumer" ? CONSUMER_LOGIN_PATH : USER_LOGIN_PATH;
 
-  return `${protocol}://${workspace}${getTopLevelDomain()}/users/auth/jwt?${params}`;
+  return `${protocol}://${workspace}${getTopLevelDomain()}${path}?${params}`;
 };
 
 export const getTopLevelDomain = () => {
