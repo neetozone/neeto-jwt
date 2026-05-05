@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { Scope } from "./types.js";
+import type { Scope } from "./types.js";
 import {
   getClientAppName,
   getLoginUri,
@@ -14,6 +14,8 @@ interface Options {
   scope?: Scope;
 }
 
+const CONSUMER_WORKSPACE = "app";
+
 class NeetoJWT {
   private email: string;
   private workspace: string;
@@ -21,12 +23,14 @@ class NeetoJWT {
   private scope: Scope;
 
   constructor(options: Options) {
-    const {
-      email,
-      workspace = process.env.NEETO_JWT_WORKSPACE,
-      privateKey = process.env.NEETO_JWT_PRIVATE_KEY,
-      scope = "user",
-    } = options || {};
+    const { email, privateKey = process.env.NEETO_JWT_PRIVATE_KEY } =
+      options || {};
+    const scope: Scope = options?.scope ?? "user";
+    const workspace =
+      options?.workspace ??
+      (scope === "consumer"
+        ? CONSUMER_WORKSPACE
+        : process.env.NEETO_JWT_WORKSPACE);
 
     if (!email) throw new Error("Email is required.");
     if (!workspace) throw new Error("Workspace is required.");
@@ -69,11 +73,11 @@ class NeetoJWT {
 
     // User scope assumes the redirectUri points at a Neeto sub-app, so the
     // shared NeetoAuth flow strips the leading subdomain. Consumer scope is
-    // for arbitrary partner domains — we pass the URI through verbatim so
-    // NeetoAuth can redirect back to the partner correctly.
+    // for arbitrary partner domains — pass the URI through verbatim and let
+    // URLSearchParams handle encoding.
     const redirect_uri =
       this.scope === "consumer"
-        ? encodeURI(redirectUri)
+        ? redirectUri
         : getRedirectUri(redirectUri);
 
     const searchParams: SearchParams = {

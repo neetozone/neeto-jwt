@@ -62,7 +62,6 @@ import NeetoJWT from "neeto-jwt";
 
 const neetoJWT = new NeetoJWT({
   email: "consumer@example.com",
-  workspace: "app",
   privateKey: "<your-private-key>",
   scope: "consumer",
 });
@@ -72,6 +71,12 @@ const loginUrl = neetoJWT.generateLoginUrl(
 );
 // => https://app.neetoauth.com/consumers/auth/jwt?...
 ```
+
+When `scope: "consumer"` is set and `workspace` is omitted, the client defaults
+to `"app"` (the only workspace consumers belong to in NeetoAuth) instead of
+reading `NEETO_JWT_WORKSPACE`. This avoids accidentally pointing the consumer
+flow at a tenant-specific workspace if you've already configured the env var
+for the user-scope flow.
 
 #### Identity is asserted, not pre-required
 
@@ -92,9 +97,10 @@ be a Neeto subdomain — any URL the partner controls works.
 ### Options
 
 - `email` (string, required): The user's email address.
-- `workspace` (string, optional): The Neeto workspace. Defaults to the
-  NEETO_JWT_WORKSPACE environment variable. For consumer scope, set this to
-  `"app"`.
+- `workspace` (string, optional): The Neeto workspace. For user scope, defaults
+  to the `NEETO_JWT_WORKSPACE` environment variable. For consumer scope, defaults
+  to `"app"` (env var ignored) since all consumers live under that workspace.
+  Pass an explicit value only if you need to override (e.g. staging tests).
 - `privateKey` (string, optional): The private key used to sign the JWT.
   Defaults to the NEETO_JWT_PRIVATE_KEY environment variable.
 - `scope` (string, optional): `"user"` (default) or `"consumer"`. Determines

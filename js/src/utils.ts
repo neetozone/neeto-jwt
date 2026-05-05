@@ -6,7 +6,7 @@ import {
   TLD,
   USER_LOGIN_PATH,
 } from "./constants.js";
-import { Scope } from "./types.js";
+import type { Scope } from "./types.js";
 
 export type SearchParams = {
   jwt: string;
