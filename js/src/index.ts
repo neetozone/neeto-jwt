@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import type { Scope } from "./types.js";
 import {
   getClientAppName,
   getLoginUri,
@@ -10,27 +11,38 @@ interface Options {
   email: string;
   workspace?: string;
   privateKey?: string;
+  scope?: Scope;
 }
+
+const CONSUMER_WORKSPACE = "app";
 
 class NeetoJWT {
   private email: string;
   private workspace: string;
   private privateKey: string;
+  private scope: Scope;
 
   constructor(options: Options) {
-    const {
-      email,
-      workspace = process.env.NEETO_JWT_WORKSPACE,
-      privateKey = process.env.NEETO_JWT_PRIVATE_KEY,
-    } = options || {};
+    const { email, privateKey = process.env.NEETO_JWT_PRIVATE_KEY } =
+      options || {};
+    const scope: Scope = options?.scope ?? "user";
+    const workspace =
+      options?.workspace ??
+      (scope === "consumer"
+        ? CONSUMER_WORKSPACE
+        : process.env.NEETO_JWT_WORKSPACE);
 
     if (!email) throw new Error("Email is required.");
     if (!workspace) throw new Error("Workspace is required.");
     if (!privateKey) throw new Error("Private key is required.");
+    if (scope !== "user" && scope !== "consumer") {
+      throw new Error("Scope must be either 'user' or 'consumer'.");
+    }
 
     this.email = email;
     this.workspace = workspace;
     this.privateKey = privateKey;
+    this.scope = scope;
   }
 
   generateJWT = () => {
@@ -59,13 +71,22 @@ class NeetoJWT {
   generateLoginUrl = (redirectUri: string) => {
     if (!redirectUri) throw new Error("Redirect URI is required");
 
+    // User scope assumes the redirectUri points at a Neeto sub-app, so the
+    // shared NeetoAuth flow strips the leading subdomain. Consumer scope is
+    // for arbitrary partner domains — pass the URI through verbatim and let
+    // URLSearchParams handle encoding.
+    const redirect_uri =
+      this.scope === "consumer"
+        ? redirectUri
+        : getRedirectUri(redirectUri);
+
     const searchParams: SearchParams = {
       jwt: this.generateJWT(),
-      redirect_uri: getRedirectUri(redirectUri),
+      redirect_uri,
       client_app_name: getClientAppName(redirectUri),
     };
 
-    return getLoginUri(this.workspace, searchParams);
+    return getLoginUri(this.workspace, searchParams, this.scope);
   };
 }
 

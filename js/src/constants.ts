@@ -4,6 +4,9 @@ export const TLD: Record<string, string> = {
   production: ".neetoauth.com",
 };
 
+export const USER_LOGIN_PATH = "/users/auth/jwt";
+export const CONSUMER_LOGIN_PATH = "/consumers/auth/jwt";
+
 export const NEETO_URL_COMPONENT_REGEX = /neeto(\w+)/;
 export const NEETO_URL_PREFIX_REGEX = /^(https?:\/\/)?(www\.)?[\w-]+\./;
 

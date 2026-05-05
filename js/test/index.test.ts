@@ -79,4 +79,94 @@ describe("NeetoJWT", () => {
     });
     expect(decoded.workspace).toBe(process.env.NEETO_JWT_WORKSPACE);
   });
+
+  it("should default to user scope and produce a /users/auth/jwt URL", () => {
+    const neetoJWT = new NeetoJWT({ email, workspace, privateKey });
+    const loginUrl = neetoJWT.generateLoginUrl(redirectUri);
+    expect(loginUrl).toContain("/users/auth/jwt");
+    expect(loginUrl).not.toContain("/consumers/auth/jwt");
+  });
+
+  it("should produce a /consumers/auth/jwt URL when scope is 'consumer'", () => {
+    const neetoJWT = new NeetoJWT({
+      email,
+      workspace: "app",
+      privateKey,
+      scope: "consumer",
+    });
+    const loginUrl = neetoJWT.generateLoginUrl(redirectUri);
+    expect(loginUrl).toContain("/consumers/auth/jwt");
+    expect(loginUrl).not.toContain("/users/auth/jwt");
+    expect(loginUrl).toContain("https://app.neetoauth.com/consumers/auth/jwt");
+  });
+
+  it("should explicitly accept 'user' scope and produce the user URL", () => {
+    const neetoJWT = new NeetoJWT({
+      email,
+      workspace,
+      privateKey,
+      scope: "user",
+    });
+    const loginUrl = neetoJWT.generateLoginUrl(redirectUri);
+    expect(loginUrl).toContain("/users/auth/jwt");
+  });
+
+  it("should throw if scope is anything other than 'user' or 'consumer'", () => {
+    expect(
+      () =>
+        new NeetoJWT({
+          email,
+          workspace,
+          privateKey,
+          // @ts-expect-error: invalid scope passed deliberately to assert runtime guard.
+          scope: "admin",
+        })
+    ).toThrow("Scope must be either 'user' or 'consumer'.");
+  });
+
+  it("should default consumer-scope workspace to 'app' when omitted, ignoring NEETO_JWT_WORKSPACE", () => {
+    const previous = process.env.NEETO_JWT_WORKSPACE;
+    process.env.NEETO_JWT_WORKSPACE = "tenant1";
+    try {
+      const neetoJWT = new NeetoJWT({ email, privateKey, scope: "consumer" });
+      const loginUrl = neetoJWT.generateLoginUrl(
+        "http://partner.example.com/post-login"
+      );
+      expect(loginUrl).toContain("https://app.neetoauth.com/consumers/auth/jwt");
+      expect(loginUrl).not.toContain("tenant1");
+    } finally {
+      process.env.NEETO_JWT_WORKSPACE = previous;
+    }
+  });
+
+  it("should honour an explicit consumer-scope workspace override", () => {
+    const neetoJWT = new NeetoJWT({
+      email,
+      privateKey,
+      workspace: "staging-app",
+      scope: "consumer",
+    });
+    const loginUrl = neetoJWT.generateLoginUrl("http://partner.example.com/cb");
+    expect(loginUrl).toContain(
+      "https://staging-app.neetoauth.com/consumers/auth/jwt"
+    );
+  });
+
+  it("should not double-encode the consumer redirect URI", () => {
+    const neetoJWT = new NeetoJWT({
+      email,
+      workspace: "app",
+      privateKey,
+      scope: "consumer",
+    });
+    const loginUrl = neetoJWT.generateLoginUrl(
+      "http://partner.example.com/path with space?q=1"
+    );
+    // URLSearchParams encodes a space as `+`, never as `%2520`.
+    expect(loginUrl).not.toContain("%2520");
+    const params = new URL(loginUrl).searchParams;
+    expect(params.get("redirect_uri")).toBe(
+      "http://partner.example.com/path with space?q=1"
+    );
+  });
 });
