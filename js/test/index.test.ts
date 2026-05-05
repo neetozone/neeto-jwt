@@ -42,8 +42,21 @@ describe("NeetoJWT", () => {
     const decoded = jwt.verify(token, publicKey, { algorithms: ["ES256"] });
     expect(decoded.email).toBe(email);
     expect(decoded.workspace).toBe(workspace);
+    expect(decoded.scope).toBe("user");
     expect(decoded.iat).toBeDefined();
     expect(decoded.exp).toBeDefined();
+  });
+
+  it("should embed scope in the JWT payload for consumer scope", () => {
+    const neetoJWT = new NeetoJWT({
+      email,
+      privateKey,
+      scope: "consumer",
+    });
+    const token = neetoJWT.generateJWT();
+    const decoded = jwt.verify(token, publicKey, { algorithms: ["ES256"] });
+    expect(decoded.scope).toBe("consumer");
+    expect(decoded.workspace).toBe("app");
   });
 
   it("should generate a login URL", () => {

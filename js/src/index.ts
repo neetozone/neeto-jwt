@@ -52,6 +52,7 @@ class NeetoJWT {
     const payload = {
       email: this.email,
       workspace: this.workspace,
+      scope: this.scope,
       iat,
       exp,
     };
