@@ -1,6 +1,7 @@
 import {
   CLIENT_APPS,
   CONSUMER_LOGIN_PATH,
+  CONSUMER_WORKSPACE,
   NEETO_URL_COMPONENT_REGEX,
   NEETO_URL_PREFIX_REGEX,
   TLD,
@@ -22,9 +23,11 @@ export const getLoginUri = (
   const protocol =
     process.env.NEETO_JWT_ENV === "development" ? "http" : "https";
   const params = new URLSearchParams(searchParams).toString();
-  const path = scope === "consumer" ? CONSUMER_LOGIN_PATH : USER_LOGIN_PATH;
+  const isConsumer = scope === "consumer";
+  const host = isConsumer ? CONSUMER_WORKSPACE : workspace;
+  const path = isConsumer ? CONSUMER_LOGIN_PATH : USER_LOGIN_PATH;
 
-  return `${protocol}://${workspace}${getTopLevelDomain()}${path}?${params}`;
+  return `${protocol}://${host}${getTopLevelDomain()}${path}?${params}`;
 };
 
 export const getTopLevelDomain = () => {
