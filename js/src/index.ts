@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import { CONSUMER_WORKSPACE } from "./constants.js";
 import type { Scope } from "./types.js";
 import {
   getClientAppName,
@@ -13,8 +14,6 @@ interface Options {
   privateKey?: string;
   scope?: Scope;
 }
-
-const CONSUMER_WORKSPACE = "app";
 
 class NeetoJWT {
   private email: string;

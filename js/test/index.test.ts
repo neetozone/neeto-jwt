@@ -152,17 +152,23 @@ describe("NeetoJWT", () => {
     }
   });
 
-  it("should honour an explicit consumer-scope workspace override", () => {
+  it("should send consumer scope to the global app host regardless of workspace override, while preserving the workspace claim", () => {
     const neetoJWT = new NeetoJWT({
       email,
       privateKey,
-      workspace: "staging-app",
+      workspace: "spinkart",
       scope: "consumer",
     });
     const loginUrl = neetoJWT.generateLoginUrl("http://partner.example.com/cb");
     expect(loginUrl).toContain(
-      "https://staging-app.neetoauth.com/consumers/auth/jwt"
+      "https://app.neetoauth.com/consumers/auth/jwt"
     );
+
+    const token = new URL(loginUrl).searchParams.get("jwt") as string;
+    const payload = JSON.parse(
+      Buffer.from(token.split(".")[1], "base64").toString()
+    );
+    expect(payload.workspace).toBe("spinkart");
   });
 
   it("should not double-encode the consumer redirect URI", () => {
