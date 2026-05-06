@@ -22,6 +22,8 @@ jobs:
     steps:
       - name: Checkout the repository
         uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
+        with:
+          token: ${{ secrets.RELEASE_PAT }}
 
       - name: Setup git user
         run: |
@@ -69,7 +71,7 @@ jobs:
       - name: Push the commit to main
         uses: ad-m/github-push-action@master
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.RELEASE_PAT }}
           branch: main
 
       - name: Publish the package on NPM
