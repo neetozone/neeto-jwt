@@ -20,7 +20,7 @@ jobs:
       contains(github.event.pull_request.labels.*.name, 'major') ) }}
     steps:
       - name: Checkout the repository
-        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
+        uses: actions/checkout@v5
         with:
           token: ${{ secrets.RELEASE_PAT }}
 
@@ -30,7 +30,7 @@ jobs:
           git config user.email "neetobot.github@neeto.com"
 
       - name: Setup NodeJS LTS version
-        uses: actions/setup-node@8c91899e586c5b171469028077307d293428b516
+        uses: actions/setup-node@v5
         with:
           node-version-file: ".nvmrc"
 
@@ -63,15 +63,19 @@ jobs:
         id: package-version
 
       - name: Create a new version release commit
-        uses: EndBug/add-and-commit@v9
+        uses: EndBug/add-and-commit@v10
         with:
           message: "New version release"
+          push: false
 
-      - name: Push the commit to main
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.RELEASE_PAT }}
-          branch: main
+      - name: Rebase on latest main and push commit and tag
+        working-directory: ${{ github.workspace }}
+        run: |
+          VERSION=$(node -p "require('./js/package.json').version")
+          git fetch origin main
+          git rebase origin/main
+          git tag -f "v${VERSION}"
+          git push --atomic origin HEAD:main "+refs/tags/v${VERSION}"
 
       - name: Publish the package on NPM
         run: |
