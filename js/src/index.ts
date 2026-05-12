@@ -15,7 +15,7 @@ interface Options {
   scope?: Scope;
 }
 
-class NeetoJWT {
+export default class NeetoJWT {
   private email: string;
   private workspace: string;
   private privateKey: string;
@@ -87,5 +87,3 @@ class NeetoJWT {
     return getLoginUri(this.workspace, searchParams, this.scope);
   };
 }
-
-export default NeetoJWT;
