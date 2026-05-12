@@ -21,12 +21,14 @@ class NeetoJWT {
   private privateKey: string;
   private scope: Scope;
 
-  constructor({
-    email,
-    scope = SCOPES.user,
-    workspace = process.env.NEETO_JWT_WORKSPACE,
-    privateKey = process.env.NEETO_JWT_PRIVATE_KEY,
-  }: Options) {
+  constructor(
+    {
+      email,
+      scope = SCOPES.user,
+      workspace = process.env.NEETO_JWT_WORKSPACE,
+      privateKey = process.env.NEETO_JWT_PRIVATE_KEY,
+    }: Options = {} as Options
+  ) {
     if (!email) throw new Error("Email is required.");
     if (!workspace) throw new Error("Workspace is required.");
     if (!privateKey) throw new Error("Private key is required.");
