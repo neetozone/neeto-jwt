@@ -158,12 +158,11 @@ describe("NeetoJWT", () => {
       );
 
       const token = new URL(loginUrl).searchParams.get("jwt") as string;
-      const payload = JSON.parse(
-        Buffer.from(token.split(".")[1], "base64").toString()
-      );
+      const payload = jwt.decode(token);
       expect(payload.workspace).toBe("tenant1");
     } finally {
-      process.env.NEETO_JWT_WORKSPACE = previous;
+      if (previous === undefined) delete process.env.NEETO_JWT_WORKSPACE;
+      else process.env.NEETO_JWT_WORKSPACE = previous;
     }
   });
 
@@ -176,7 +175,8 @@ describe("NeetoJWT", () => {
         () => new NeetoJWT({ email, privateKey, scope: SCOPES.consumer })
       ).toThrow("Workspace is required.");
     } finally {
-      process.env.NEETO_JWT_WORKSPACE = previous;
+      if (previous === undefined) delete process.env.NEETO_JWT_WORKSPACE;
+      else process.env.NEETO_JWT_WORKSPACE = previous;
     }
   });
 
@@ -190,9 +190,7 @@ describe("NeetoJWT", () => {
     const loginUrl = neetoJWT.generateLoginUrl("http://partner.example.com/cb");
     expect(loginUrl).toContain("https://app.neetoauth.com/consumers/auth/jwt");
     const token = new URL(loginUrl).searchParams.get("jwt") as string;
-    const payload = JSON.parse(
-      Buffer.from(token.split(".")[1], "base64").toString()
-    );
+    const payload = jwt.decode(token);
     expect(payload.workspace).toBe("spinkart");
   });
 
