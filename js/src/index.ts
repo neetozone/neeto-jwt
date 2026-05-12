@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { CONSUMER_WORKSPACE } from "./constants.js";
+import { SCOPES } from "./constants.js";
 import type { Scope } from "./types.js";
 import {
   getClientAppName,
@@ -21,21 +21,19 @@ class NeetoJWT {
   private privateKey: string;
   private scope: Scope;
 
-  constructor(options: Options) {
-    const { email, privateKey = process.env.NEETO_JWT_PRIVATE_KEY } =
-      options || {};
-    const scope: Scope = options?.scope ?? "user";
-    const workspace =
-      options?.workspace ??
-      (scope === "consumer"
-        ? CONSUMER_WORKSPACE
-        : process.env.NEETO_JWT_WORKSPACE);
-
+  constructor({
+    email,
+    scope = SCOPES.user,
+    workspace = process.env.NEETO_JWT_WORKSPACE,
+    privateKey = process.env.NEETO_JWT_PRIVATE_KEY,
+  }: Options) {
     if (!email) throw new Error("Email is required.");
     if (!workspace) throw new Error("Workspace is required.");
     if (!privateKey) throw new Error("Private key is required.");
-    if (scope !== "user" && scope !== "consumer") {
-      throw new Error("Scope must be either 'user' or 'consumer'.");
+    if (!Object.values(SCOPES).includes(scope)) {
+      throw new Error(
+        `Scope must be one of: ${Object.values(SCOPES).join(", ")}`
+      );
     }
 
     this.email = email;
@@ -59,13 +57,11 @@ class NeetoJWT {
     try {
       const token = jwt.sign(payload, this.privateKey, { algorithm: "ES256" });
       return token;
-    } catch (error) {
+    } catch {
       throw new Error(
         `Your key is invalid. We use asymmetric encryption for SSO login.\nPlease fill out https://neeto-jwt.neetodesk.com/forms/jwt-login-in-neeto.\nWe will generate a public-private key pair and share the private key with you. This key will assist you with SSO login.`
       );
     }
-
-    return null;
   };
 
   generateLoginUrl = (redirectUri: string) => {
@@ -76,7 +72,7 @@ class NeetoJWT {
     // for arbitrary partner domains — pass the URI through verbatim and let
     // URLSearchParams handle encoding.
     const redirect_uri =
-      this.scope === "consumer"
+      this.scope === SCOPES.consumer
         ? redirectUri
         : getRedirectUri(redirectUri);
 
