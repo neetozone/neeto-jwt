@@ -2,6 +2,11 @@ import { describe, it, expect } from "vitest";
 import jwt from "jsonwebtoken";
 import NeetoJWT from "../src";
 import { generateES256KeyPair } from "./utils";
+import {
+  CONSUMER_LOGIN_PATH,
+  SCOPES,
+  USER_LOGIN_PATH,
+} from "../src/constants.js";
 
 const { privateKey, publicKey } = generateES256KeyPair();
 
@@ -42,7 +47,7 @@ describe("NeetoJWT", () => {
     const decoded = jwt.verify(token, publicKey, { algorithms: ["ES256"] });
     expect(decoded.email).toBe(email);
     expect(decoded.workspace).toBe(workspace);
-    expect(decoded.scope).toBe("user");
+    expect(decoded.scope).toBe(SCOPES.user);
     expect(decoded.iat).toBeDefined();
     expect(decoded.exp).toBeDefined();
   });
@@ -50,13 +55,14 @@ describe("NeetoJWT", () => {
   it("should embed scope in the JWT payload for consumer scope", () => {
     const neetoJWT = new NeetoJWT({
       email,
+      workspace,
       privateKey,
-      scope: "consumer",
+      scope: SCOPES.consumer,
     });
     const token = neetoJWT.generateJWT();
     const decoded = jwt.verify(token, publicKey, { algorithms: ["ES256"] });
-    expect(decoded.scope).toBe("consumer");
-    expect(decoded.workspace).toBe("app");
+    expect(decoded.scope).toBe(SCOPES.consumer);
+    expect(decoded.workspace).toBe(workspace);
   });
 
   it("should generate a login URL", () => {
@@ -80,24 +86,22 @@ describe("NeetoJWT", () => {
   });
 
   it("should use environment variables for workspace and privateKey if not provided", () => {
-    process.env.NEETO_JWT_WORKSPACE = "spinkart";
+    process.env.NEETO_JWT_WORKSPACE = workspace;
     process.env.NEETO_JWT_PRIVATE_KEY = privateKey;
 
     const neetoJWT = new NeetoJWT({ email });
     const token = neetoJWT.generateJWT();
     expect(token).toBeDefined();
 
-    const decoded = jwt.verify(token, publicKey, {
-      algorithms: ["ES256"],
-    });
+    const decoded = jwt.verify(token, publicKey, { algorithms: ["ES256"] });
     expect(decoded.workspace).toBe(process.env.NEETO_JWT_WORKSPACE);
   });
 
   it("should default to user scope and produce a /users/auth/jwt URL", () => {
     const neetoJWT = new NeetoJWT({ email, workspace, privateKey });
     const loginUrl = neetoJWT.generateLoginUrl(redirectUri);
-    expect(loginUrl).toContain("/users/auth/jwt");
-    expect(loginUrl).not.toContain("/consumers/auth/jwt");
+    expect(loginUrl).toContain(USER_LOGIN_PATH);
+    expect(loginUrl).not.toContain(CONSUMER_LOGIN_PATH);
   });
 
   it("should produce a /consumers/auth/jwt URL when scope is 'consumer'", () => {
@@ -105,11 +109,11 @@ describe("NeetoJWT", () => {
       email,
       workspace: "app",
       privateKey,
-      scope: "consumer",
+      scope: SCOPES.consumer,
     });
     const loginUrl = neetoJWT.generateLoginUrl(redirectUri);
-    expect(loginUrl).toContain("/consumers/auth/jwt");
-    expect(loginUrl).not.toContain("/users/auth/jwt");
+    expect(loginUrl).toContain(CONSUMER_LOGIN_PATH);
+    expect(loginUrl).not.toContain(USER_LOGIN_PATH);
     expect(loginUrl).toContain("https://app.neetoauth.com/consumers/auth/jwt");
   });
 
@@ -118,10 +122,10 @@ describe("NeetoJWT", () => {
       email,
       workspace,
       privateKey,
-      scope: "user",
+      scope: SCOPES.user,
     });
     const loginUrl = neetoJWT.generateLoginUrl(redirectUri);
-    expect(loginUrl).toContain("/users/auth/jwt");
+    expect(loginUrl).toContain(USER_LOGIN_PATH);
   });
 
   it("should throw if scope is anything other than 'user' or 'consumer'", () => {
@@ -134,19 +138,43 @@ describe("NeetoJWT", () => {
           // @ts-expect-error: invalid scope passed deliberately to assert runtime guard.
           scope: "admin",
         })
-    ).toThrow("Scope must be either 'user' or 'consumer'.");
+    ).toThrow(`Scope must be one of: ${Object.values(SCOPES).join(", ")}`);
   });
 
-  it("should default consumer-scope workspace to 'app' when omitted, ignoring NEETO_JWT_WORKSPACE", () => {
+  it("should always use the global app auth host for consumer scope, even when workspace comes from NEETO_JWT_WORKSPACE", () => {
     const previous = process.env.NEETO_JWT_WORKSPACE;
     process.env.NEETO_JWT_WORKSPACE = "tenant1";
     try {
-      const neetoJWT = new NeetoJWT({ email, privateKey, scope: "consumer" });
+      const neetoJWT = new NeetoJWT({
+        email,
+        privateKey,
+        scope: SCOPES.consumer,
+      });
       const loginUrl = neetoJWT.generateLoginUrl(
         "http://partner.example.com/post-login"
       );
-      expect(loginUrl).toContain("https://app.neetoauth.com/consumers/auth/jwt");
-      expect(loginUrl).not.toContain("tenant1");
+      expect(loginUrl).toContain(
+        "https://app.neetoauth.com/consumers/auth/jwt"
+      );
+
+      const token = new URL(loginUrl).searchParams.get("jwt") as string;
+      const payload = JSON.parse(
+        Buffer.from(token.split(".")[1], "base64").toString()
+      );
+      expect(payload.workspace).toBe("tenant1");
+    } finally {
+      process.env.NEETO_JWT_WORKSPACE = previous;
+    }
+  });
+
+  it("should throw when consumer scope is used without workspace or NEETO_JWT_WORKSPACE", () => {
+    const previous = process.env.NEETO_JWT_WORKSPACE;
+    delete process.env.NEETO_JWT_WORKSPACE;
+
+    try {
+      expect(
+        () => new NeetoJWT({ email, privateKey, scope: SCOPES.consumer })
+      ).toThrow("Workspace is required.");
     } finally {
       process.env.NEETO_JWT_WORKSPACE = previous;
     }
@@ -157,13 +185,10 @@ describe("NeetoJWT", () => {
       email,
       privateKey,
       workspace: "spinkart",
-      scope: "consumer",
+      scope: SCOPES.consumer,
     });
     const loginUrl = neetoJWT.generateLoginUrl("http://partner.example.com/cb");
-    expect(loginUrl).toContain(
-      "https://app.neetoauth.com/consumers/auth/jwt"
-    );
-
+    expect(loginUrl).toContain("https://app.neetoauth.com/consumers/auth/jwt");
     const token = new URL(loginUrl).searchParams.get("jwt") as string;
     const payload = JSON.parse(
       Buffer.from(token.split(".")[1], "base64").toString()
@@ -176,7 +201,7 @@ describe("NeetoJWT", () => {
       email,
       workspace: "app",
       privateKey,
-      scope: "consumer",
+      scope: SCOPES.consumer,
     });
     const loginUrl = neetoJWT.generateLoginUrl(
       "http://partner.example.com/path with space?q=1"
