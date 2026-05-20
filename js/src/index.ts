@@ -15,13 +15,15 @@ interface Options {
   scope?: Scope;
 }
 
+const CANONICAL_SCOPES = Object.values(SCOPES) as readonly CanonicalScope[];
+
 const ACCEPTED_SCOPES: readonly Scope[] = [
-  ...Object.values(SCOPES),
+  ...CANONICAL_SCOPES,
   ...(Object.keys(SCOPE_ALIASES) as Array<keyof typeof SCOPE_ALIASES>),
 ];
 
 const normalizeScope = (scope: Scope): CanonicalScope => {
-  if ((Object.values(SCOPES) as string[]).includes(scope)) {
+  if ((CANONICAL_SCOPES as readonly string[]).includes(scope)) {
     return scope as CanonicalScope;
   }
   return SCOPE_ALIASES[scope as keyof typeof SCOPE_ALIASES];
