@@ -43,9 +43,6 @@ export const SCOPES = {
   consumer: "consumer",
 } as const;
 
-// Aliases map to their canonical scope. Both the canonical name and the alias
-// are accepted as input; internally everything is normalized to the canonical
-// value so the JWT payload and downstream URL routing stay stable.
 export const SCOPE_ALIASES = {
   "team-member": SCOPES.user,
   customer: SCOPES.consumer,
