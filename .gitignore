@@ -21,3 +21,5 @@ yarn-1.22.5.js
 yalc.lock
 /.yalc
 
+
+.claude/
