@@ -194,6 +194,38 @@ describe("NeetoJWT", () => {
     expect(payload.workspace).toBe("spinkart");
   });
 
+  it("should accept 'team-member' as an alias for 'user' scope", () => {
+    const neetoJWT = new NeetoJWT({
+      email,
+      workspace,
+      privateKey,
+      scope: "team-member",
+    });
+    const token = neetoJWT.generateJWT();
+    const decoded = jwt.verify(token, publicKey, { algorithms: ["ES256"] });
+    expect(decoded.scope).toBe(SCOPES.user);
+
+    const loginUrl = neetoJWT.generateLoginUrl(redirectUri);
+    expect(loginUrl).toContain(USER_LOGIN_PATH);
+    expect(loginUrl).not.toContain(CONSUMER_LOGIN_PATH);
+  });
+
+  it("should accept 'customer' as an alias for 'consumer' scope", () => {
+    const neetoJWT = new NeetoJWT({
+      email,
+      workspace: "app",
+      privateKey,
+      scope: "customer",
+    });
+    const token = neetoJWT.generateJWT();
+    const decoded = jwt.verify(token, publicKey, { algorithms: ["ES256"] });
+    expect(decoded.scope).toBe(SCOPES.consumer);
+
+    const loginUrl = neetoJWT.generateLoginUrl(redirectUri);
+    expect(loginUrl).toContain(CONSUMER_LOGIN_PATH);
+    expect(loginUrl).toContain("https://app.neetoauth.com/consumers/auth/jwt");
+  });
+
   it("should not double-encode the consumer redirect URI", () => {
     const neetoJWT = new NeetoJWT({
       email,

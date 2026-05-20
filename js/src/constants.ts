@@ -42,3 +42,8 @@ export const SCOPES = {
   user: "user",
   consumer: "consumer",
 } as const;
+
+export const SCOPE_ALIASES = {
+  "team-member": SCOPES.user,
+  customer: SCOPES.consumer,
+} as const;
