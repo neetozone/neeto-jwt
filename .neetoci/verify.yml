@@ -4,7 +4,7 @@ plan: standard-2
 
 paths:
   - js/**
-  - .neetoci/default.yml
+  - .neetoci/verify.yml
   - .node-version
   - .nvmrc
 
