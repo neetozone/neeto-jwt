@@ -7,19 +7,25 @@ paths:
   - .neetoci/verify.yml
   - .node-version
   - .nvmrc
+  - package.json
+  - yarn.lock
+  - eslint.config.mjs
+  - .prettierrc
 
 global_job_config:
   setup:
     - checkout
     - neetoci-version node 22.13
-    - cd js
     - cache restore
     - yarn install
+    - yarn --cwd js install
     - cache store
   jobs:
     - name: CiChecks
       commands:
-        - yarn test
+        - yarn eslint js eslint.config.mjs
+        - yarn prettier --check "js/**/*.{js,ts,mjs,cjs}" eslint.config.mjs
+        - yarn --cwd js test
 
 triggers:
   - event: branch
